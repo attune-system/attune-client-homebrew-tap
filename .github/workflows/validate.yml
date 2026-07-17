@@ -1,0 +1,37 @@
+name: Validate Tap
+
+on:
+  pull_request:
+    paths:
+      - "Casks/**"
+      - ".github/workflows/validate.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "Casks/**"
+      - ".github/workflows/validate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: macos-14
+    steps:
+      - name: Check out tap
+        uses: actions/checkout@v6
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+
+      - name: Audit cask
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f Casks/attune.rb ]; then
+            echo "No released Attune cask to audit yet."
+            exit 0
+          fi
+
+          brew audit --cask --strict Casks/attune.rb
